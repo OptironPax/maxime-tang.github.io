@@ -1,0 +1,1548 @@
+<!--
+  Portfolio étudiant - fichier unique (HTML + CSS + JS)
+  Instructions rapides :
+  - Enregistrez ce fichier comme `portfolio.html` puis ouvrez-le dans votre navigateur.
+  - Pour modifier les couleurs, changez les variables CSS dans :root (recherchez /* THEME */).
+  - Pour ajouter un projet, copiez une `.project-card` (section Projets) et remplissez titre, description, image, liens.
+  - Le formulaire Contact utilise mailto: (fonctionne sans serveur). Pour envoyer via backend, remplacez l'attribut action du formulaire.
+  - Supprimez ou adaptez les sections (À propos, Compétences, Projets, Contact) selon vos besoins.
+-->
+
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Portfolio — Maxime TANG</title>
+  <meta name="description" content="Portfolio — Maxime TANG. Projets, compétences et contact." />
+  <style>
+    /* ---------------- THEME ---------------- */
+    :root {
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #2563eb;
+      --glass: rgba(255, 255, 255, 0.6);
+      --radius: 14px;
+      --shadow: 0 6px 20px rgba(16, 24, 40, 0.08);
+      --mono: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .dark {
+      --bg: #0b1220;
+      --card: #071226;
+      --text: #e6eef8;
+      --muted: #a8c0db;
+      --glass: rgba(70, 64, 64, 0.03);
+      --shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: var(--mono);
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 32px auto;
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: all 0.3s ease;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 1000;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .logo {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+
+    .nav {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .btn {
+      background: var(--card);
+      padding: 10px 14px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      transition: all 0.3s ease;
+      color: var(--text);
+    }
+
+    .dark .btn {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Transformation progressive en header réduit */
+    header.shrink {
+      padding: 6px 12px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      transform: scale(0.96) translateY(-4px);
+      border-radius: var(--radius);
+    }
+
+    header.shrink .brand {
+      align-items: center;
+    }
+
+    header.shrink .brand .logo {
+      width: 36px;
+      height: 36px;
+      font-size: 14px;
+    }
+
+    header.shrink .brand .name {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    header.shrink .brand small {
+      display: none;
+    }
+
+    /* NOUVEAU CSS POUR LA MODALE */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      /* Caché par défaut */
+      align-items: flex-start;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      padding: 40px 20px;
+      overflow-y: auto;
+      /* Pour les petits écrans */
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: var(--card);
+      padding: 30px;
+      border-radius: var(--radius);
+      max-width: 800px;
+      width: 100%;
+      box-shadow: var(--shadow);
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+      max-height: calc(100vh - 80px);
+      overflow-y: auto;
+      margin: auto 0;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header button {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--muted);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .modal-header button:hover {
+      background: var(--glass);
+    }
+
+    .modal-body p {
+      line-height: 1.6;
+    }
+
+    .modal-image {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    /* Rendre la carte de projet cliquable sur toute sa surface */
+    .project-card {
+      cursor: pointer;
+    }
+
+    .project-card a.btn {
+      pointer-events: none;
+      /* Désactive les liens à l'intérieur de la carte */
+      opacity: 0;
+      /* Optionnel : les masquer */
+    }
+
+    .project-card .project-body {
+      min-height: 140px;
+      /* Assure une hauteur minimale */
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: center;
+      margin-top: 22px;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 22px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .intro h1 {
+      margin: 0 0 6px 0;
+      font-size: clamp(22px, 3vw, 34px);
+    }
+
+    .intro p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .cta {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .primary {
+      background: linear-gradient(90deg, var(--accent), #7c3aed);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: none;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .profile {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* Make the profile video responsive and constrained */
+    .profile video {
+      width: 100%;
+      height: auto;
+      max-height: 360px;
+      border-radius: 12px;
+      background: #000;
+      display: block;
+      object-fit: contain;
+    }
+
+    /* When replacing the video with an image */
+    .profile .profile-image {
+      width: 100%;
+      height: auto;
+      max-height: 360px;
+      border-radius: 12px;
+      display: block;
+      object-fit: cover;
+      background: #000;
+      margin: 0 auto;
+      transform: scaleX(-1);
+    }
+
+    .avatar {
+      width: 140px;
+      height: 140px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #fff, #f0f3ff);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 28px;
+    }
+
+    .meta small {
+      color: var(--muted);
+    }
+
+    section {
+      margin-top: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .skills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .skill-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .skill {
+      background: var(--card);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      display: block;
+      cursor: help;
+      box-shadow: var(--shadow);
+      /* Indique qu'il y a plus d'info */
+    }
+
+    .dark .skill {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Style du détail caché (Tooltip) */
+    .skill-detail {
+      position: absolute;
+      bottom: 120%;
+      /* Positionne au-dessus du conteneur */
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      /* Empêche le texte de s'enrouler */
+      background: var(--text);
+      /* Fond sombre pour le tooltip */
+      color: var(--card);
+      /* Texte clair */
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      opacity: 0;
+      /* Masqué par défaut */
+      visibility: hidden;
+      pointer-events: none;
+      /* Permet d'ignorer le clic sur le détail */
+      transition: opacity 0.3s, visibility 0.3s;
+      z-index: 500;
+      box-shadow: var(--shadow);
+    }
+
+    /* Affichage du détail au survol du conteneur */
+    .skill-container:hover .skill-detail {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Image tooltip for Dessin skill */
+    .skill-detail-images {
+      position: absolute;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card);
+      padding: 8px;
+      border-radius: 8px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.3s, visibility 0.3s;
+      z-index: 500;
+      box-shadow: var(--shadow);
+      display: flex;
+      gap: 8px;
+      white-space: normal;
+    }
+
+    .skill-detail-images img {
+      height: 120px;
+      width: auto;
+      object-fit: contain;
+      border-radius: 6px;
+      display: block;
+    }
+
+    .skill-container:hover .skill-detail-images {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    /* --- NOUVEAUX STYLES POUR CARROUSEL ET GRILLE PROJETS --- */
+    .projects-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .projects-header h2 {
+      margin: 0;
+    }
+
+    .projects-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .scroll-nav {
+      display: flex;
+      gap: 8px;
+    }
+
+    .scroll-btn {
+      background: var(--glass);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      transition: background 0.2s, opacity 0.3s;
+    }
+
+    .scroll-btn:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    .scroll-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Carrousel (Défaut) */
+    .projects-grid {
+      display: flex;
+      overflow-x: scroll;
+      scroll-snap-type: x mandatory;
+      gap: 16px;
+      padding-bottom: 20px;
+      scrollbar-width: none;
+    }
+
+    .projects-grid::-webkit-scrollbar {
+      display: none;
+    }
+
+    .projects-grid .project-card {
+      flex-shrink: 0;
+      width: 300px;
+      scroll-snap-align: start;
+    }
+
+    /* Vue Grille (Toggle) */
+    #projets.projects-grid-view .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      overflow-x: hidden;
+    }
+
+    #projets.projects-grid-view .projects-grid .project-card {
+      width: auto;
+    }
+
+    #projets.projects-grid-view .scroll-nav {
+      display: none;
+    }
+
+    /* --- FIN STYLES CARROUSEL --- */
+
+    .project-card {
+      overflow: hidden;
+      border-radius: 12px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .project-card img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .project-body {
+      padding: 12px;
+      background: var(--card);
+    }
+
+    .project-title {
+      margin: 0 0 6px 0;
+      font-weight: 600;
+      transition: transform 0.3s ease-out, color 0.3s ease-out;
+      display: inline-block;
+      transform-origin: left;
+    }
+
+    .project-card:hover .project-title {
+      transform: scale(1.08);
+      color: var(--accent);
+    }
+
+    .project-card:hover {
+      box-shadow: 0 10px 30px rgba(16, 24, 40, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .project-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .project-tags {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: 12px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: var(--glass);
+    }
+
+    form {
+      display: grid;
+      gap: 8px;
+    }
+
+    input,
+    textarea {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      color: var(--text);
+    }
+
+    .dark input,
+    .dark textarea {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    footer {
+      margin: 32px 0 80px;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-3 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Featured video card */
+    .featured-video-card video {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      display: block;
+      background: #000;
+    }
+
+    @media (max-width: 520px) {
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .brand .name {
+        display: none;
+      }
+
+      .nav {
+        gap: 6px;
+      }
+
+      .profile video,
+      .profile .profile-image {
+        max-height: 220px;
+      }
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header id="mainHeader">
+      <div class="brand">
+        <div>
+          <div class="name" style="font-weight: 700">Maxime TANG</div>
+          <small class="muted">Mécanique · Conception</small>
+        </div>
+      </div>
+      <nav class="nav">
+        <button id="toggleTheme" class="btn" title="Basculer thème sombre">
+          🌓
+        </button>
+        <a class="btn" href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="card intro">
+          <h1>Bonjour !</h1>
+          <p>
+            <br />À travers ce site, je vais vous présenter qui je suis, mon
+            parcours, mes compétences, ainsi que les différentes expériences
+            et réalisations auxquelles j'ai pu les appliquer.
+          </p>
+          <div class="cta">
+            <a class="primary" href="#projets">Voir mes réalisations</a>
+            <a class="btn" href="CV Maxime Tang FR.pdf" download>Télécharger CV</a>
+          </div>
+          <section style="margin-top: 12px">
+            <h3>Compétences</h3>
+            <div class="skills">
+              <span class="skill-container">
+                <span class="skill">CAO</span>
+                <span class="skill-detail">Maîtrise de CREO et Fusion 360</span>
+              </span>
+              <span class="skill-container">
+                <span class="skill">Impression 3D</span>
+                <span class="skill-detail">Exploitation des imprimantes 3D FDM : Creality K1 Max,
+                  Creality K2 Plus, Bambulab X1E</span>
+              </span>
+              <span class="skill-container">
+                <span class="skill">Dessin</span>
+                <span class="skill-detail">Dessin de plans, d'ensembles. Lecture de plans, cotation
+                  fonctionnelle</span>
+              </span>
+              <span class="skill-container">
+                <span class="skill">Usinage</span>
+                <span class="skill-detail">Tournage et fraisage traditionnel et programmation
+                  CN</span>
+              </span>
+              <span class="skill-container">
+                <span class="skill">Langues</span>
+                <span class="skill-detail">Français, Anglais C1, Mandarin maternelle</span>
+              </span>
+            </div>
+          </section>
+
+          <section style="margin-top: 12px">
+            <h3>Centres d'intéret</h3>
+            <div class="skills">
+              <span class="skill-container">
+                <span class="skill">Conception</span>
+                <span class="skill-detail">Conception et impression 3D</span>
+              </span>
+              <span class="skill-container">
+                <span class="skill">Dessin</span>
+                <span class="skill-detail-images">
+                  <img src="IMG_requin.jpg" alt="Requin" />
+                  <img src="IMG_panda.jpg" alt="Panda" />
+                  <img src="IMG_findus.jpg" alt="Findus" />
+                </span>
+              </span>
+              <span class="skill-container">
+                <span class="skill">Escrime</span>
+                <span class="skill-detail">Tireur au sabre, arbitre départemental aux 3 armes</span>
+              </span>
+              <span class="skill-container">
+                <span class="skill">Musique</span>
+                <span class="skill-detail">Piano, obtention du Certificat d'Etudes Musicales (CEM) du
+                  conservatoire d'Aulnay-sous-Bois</span>
+              </span>
+              <span class="skill-container">
+                <span class="skill">Aéromodelisme</span>
+                <span class="skill-detail">Construction et pilotage de modèles réduits d'avions</span>
+              </span>
+              <span class="skill-container">
+                <span class="skill">Théâtre</span>
+                <span class="skill-detail">Représentation, écriture de pièces de théâtre, ateliers
+                  d'improvisation</span>
+              </span>
+            </div>
+          </section>
+        </div>
+
+        <aside class="card profile">
+          <img src="Moi.jpg" alt="Moi" class="profile-image" />
+          <div style="
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                width: 100%;
+                justify-content: center;
+                margin-top: 12px;
+              ">
+            <h1>Maxime TANG</h1>
+            <a class="btn" href="https://www.linkedin.com/in/maxime-tang-🤺-316439262" target="_blank">LinkedIn</a>
+          </div>
+        </aside>
+      </section>
+
+      <section id="formation" class="card" style="margin-top: 20px">
+        <h2 style="margin-top: 0">Parcours</h2>
+        <div class="grid-2">
+          <div>
+            <h3 style="margin-top: 0; margin-bottom: 4px">
+              BUT Génie Mécanique et Productique (GMP)
+            </h3>
+            <p style="margin: 0; color: var(--accent); font-weight: 600">
+              IUT d'Orléans
+            </p>
+            <p style="margin: 4px 0 0 0" class="muted">
+              2023 - 2026
+            </p>
+            <ul style="padding-left: 20px; margin-top: 8px; font-size: 15px">
+              <li>Spécialisation en Innovation pour l'industrie</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 style="margin-top: 0; margin-bottom: 4px">
+              Habilitation Habilec
+            </h3>
+            <p style="margin: 0; color: var(--accent); font-weight: 600">
+              IUT d'Orléans
+            </p>
+            <p style="margin: 4px 0 0 0" class="muted">Obtenu en 2025</p>
+            <ul style="padding-left: 20px; margin-top: 8px; font-size: 15px">
+              <li>Habilitation électrique.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 style="margin-top: 0; margin-bottom: 4px">
+              PEIP (Parcours des Écoles d'Ingénieurs Polytech) - Première année
+            </h3>
+            <p style="margin: 0; color: var(--accent); font-weight: 600">
+              Polytech Orléans
+            </p>
+            <p style="margin: 4px 0 0 0" class="muted">
+              2022 - 2023
+            </p>
+            <ul style="padding-left: 20px; margin-top: 8px; font-size: 15px">
+              <li>Première année de classe préparatoire intégrée aux écoles d'ingénieurs Polytech.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 style="margin-top: 0; margin-bottom: 4px">
+              Baccalauréat Général
+            </h3>
+            <p style="margin: 0; color: var(--accent); font-weight: 600">
+              Lycée L'Espérance, Aulnay-sous-Bois
+            </p>
+            <p style="margin: 4px 0 0 0" class="muted">Obtenu en 2022</p>
+            <ul style="padding-left: 20px; margin-top: 8px; font-size: 15px">
+              <li>Mention Bien.</li>
+              <li>Spécialités : Math - Physique-chimie.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 style="margin-top: 0; margin-bottom: 4px">
+              Cambridge English Certificate (CEC) - B2 First
+            </h3>
+            <p style="margin: 0; color: var(--accent); font-weight: 600">
+              Lycée L'Espérance, Aulnay-sous-Bois
+            </p>
+            <p style="margin: 4px 0 0 0" class="muted">Obtenu en 2022</p>
+            <ul style="padding-left: 20px; margin-top: 8px; font-size: 15px">
+              <li>Certification du niveau d'anglais B2 First.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card featured-video-card" style="margin-top: 20px">
+        <h2 style="margin-top: 0">Qui suis-je?</h2>
+        <video controls poster="miniature_video.jpg" preload="metadata">
+          <source src="o22204964_tang_ppp_video.mp4" type="video/mp4" />
+          Votre navigateur ne supporte pas la lecture vidéo.
+        </video>
+      </section>
+
+      <section id="experiences" class="card" style="margin-top: 20px">
+        <div class="projects-header">
+          <h2 style="margin-top: 0">Expériences</h2>
+          <div class="projects-controls">
+            <div class="scroll-nav">
+              <button id="prevExpBtn" class="scroll-btn" title="Précédent">
+                ◀
+              </button>
+              <button id="nextExpBtn" class="scroll-btn" title="Suivant">
+                ▶
+              </button>
+            </div>
+            <button id="toggleExperiencesView" class="btn">
+              Tout afficher
+            </button>
+          </div>
+        </div>
+
+        <div class="projects-grid" id="experiencesGrid">
+          <article class="project-card open-modal" data-project-id="e1">
+            <img src="mbda-missile-systems-vector-logo.png" alt="Logo MBDA" />
+            <div class="project-body">
+              <h3 class="project-title">Alternance - MBDA</h3>
+              <p class="project-desc">
+                Exploitation du Fablab interne (OpenLab).
+              </p>
+              <div class="project-tags">
+                <span class="tag">CAO</span>
+                <span class="tag">Impression 3D</span>
+                <span class="tag">Scan 3D</span>
+                <span class="tag">Relationnel</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="project-card open-modal" data-project-id="e2">
+            <img src="mbda-missile-systems-vector-logo.png" alt="Logo MBDA" />
+            <div class="project-body">
+              <h3 class="project-title">Stage - MBDA</h3>
+              <p class="project-desc">
+                Mise en œuvre d'un démonstrateur robotique d'intelligence artificielle.
+              </p>
+              <div class="project-tags">
+                <span class="tag">Robotique</span>
+                <span class="tag">IA</span>
+                <span class="tag">CAO</span>
+                <span class="tag">Impression 3D</span>
+                <span class="tag">Scan 3D</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="project-card open-modal" data-project-id="e3">
+            <img src="OCAC.jpg" alt="Logo OCAC" />
+            <div class="project-body">
+              <h3 class="project-title">English teaching volunteer service program - OCAC</h3>
+              <p class="project-desc">
+                Assistant d'anglais bénévole à Kaohsiung, Taiwan.
+              </p>
+              <div class="project-tags">
+                <span class="tag">Anglais</span>
+                <span class="tag">Mandarin</span>
+                <span class="tag">Enseignement</span>
+                <span class="tag">Multiculturel</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="projets" class="card" style="margin-top: 20px">
+        <div class="projects-header">
+          <h2 style="margin-top: 0">Projets</h2>
+          <div class="projects-controls">
+            <div class="scroll-nav">
+              <button id="prevBtn" class="scroll-btn" title="Précédent">
+                ◀
+              </button>
+              <button id="nextBtn" class="scroll-btn" title="Suivant">
+                ▶
+              </button>
+            </div>
+            <button id="toggleProjectsView" class="btn">Tout afficher</button>
+          </div>
+        </div>
+
+        <div class="projects-grid" id="projectsGrid">
+          <article class="project-card open-modal" data-project-id="p3">
+            <img src="musicbox_fermée.png" alt="Aperçu Boîte à musique" />
+            <div class="project-body">
+              <h3 class="project-title">Boîte à musique - IUT d'Orléans</h3>
+              <p class="project-desc">
+                Conception d'une boîte à musique
+              </p>
+              <div class="project-tags">
+                <span class="tag">CAO</span>
+                <span class="tag">Impression 3D</span>
+                <span class="tag">Mécanisme</span>
+                <span class="tag">Événement</span>
+              </div>
+            </div>
+          </article> 
+
+          <article class="project-card open-modal" data-project-id="p4">
+            <img src="delorean.png" alt="Aperçu projet 4" />
+            <div class="project-body">
+              <h3 class="project-title">Delorean RC - IUT d'Orléans</h3>
+              <p class="project-desc">
+                Conception d'une coque de Delorean radiocommandée
+              </p>
+              <div class="project-tags">
+                <span class="tag">CAO</span>
+                <span class="tag">Fraisage CN</span>
+                <span class="tag">Themoforgeage</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="project-card open-modal" data-project-id="p5">
+            <img src="polyblimp_cao.png" alt="Aperçu PolyBlimp" />
+            <div class="project-body">
+              <h3 class="project-title">PolyBlimp - SpaceTech, Polytech Orléans</h3>
+              <p class="project-desc">
+                Conception d'un dirigeable radiocommandée
+              </p>
+              <div class="project-tags">
+                <span class="tag">CAO</span>
+                <span class="tag">Impression 3D</span>
+                <span class="tag">Electronique</span>
+                <span class="tag">Codage Arduino</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="project-card open-modal" data-project-id="p6">
+            <img src="spike.png" alt="Aperçu projet 6" />
+            <div class="project-body">
+              <h3 class="project-title">Roxel - 24H de l'Innovation</h3>
+              <p class="project-desc">
+                Conception d'un col de missile à section variable
+              </p>
+              <div class="project-tags">
+                <span class="tag">CAO</span>
+                <span class="tag">Maquette</span>
+                <span class="tag">Aéronautique</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="project-card open-modal" data-project-id="p7">
+            <img src="cale_maquette.png" alt="Aperçu Cales de pare-brises d'avion" />
+            <div class="project-body">
+              <h3 class="project-title">Saint Gobain - 24H de l'Innovation</h3>
+              <p class="project-desc">
+                Conception d'un système de dépôt de cales sur pare-brises d'avion
+              </p>
+              <div class="project-tags">
+                <span class="tag">CAO</span>
+                <span class="tag">Maquette</span>
+                <span class="tag">Aéronautique</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="project-card open-modal" data-project-id="p8">
+            <img src="24H_butée.png" alt="Aperçu Automatisation de l'assemblage de butées à aiguilles" />
+            <div class="project-body">
+              <h3 class="project-title">JTEKT Bearings - 24H de l'Innovation</h3>
+              <p class="project-desc">
+                Automatisation de l'assemblage de butées à aiguilles
+              </p>
+              <div class="project-tags">
+                <span class="tag">CAO</span>
+                <span class="tag">Automatisation</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="card" id="contact">
+        <h2 style="margin-top: 0">Contact</h2>
+        <p class="muted">
+          Envoyez-moi un message, j'y répondrai dès que possible !
+        </p>
+        <form action="mailto:maxxime.tang@gmail.com" method="post" enctype="text/plain">
+          <input type="text" name="name" placeholder="Votre nom" required />
+          <input type="email" name="email" placeholder="Votre e‑mail" required />
+          <input type="text" name="subject" placeholder="Objet" />
+          <textarea name="message" placeholder="Votre message"></textarea>
+          <div style="display: flex; gap: 8px">
+            <button class="primary" type="submit">Envoyer</button>
+            <button type="reset" class="btn">Effacer</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <div id="projectModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">Titre du Projet</h2>
+          <button id="closeModalBtn" title="Fermer la fenêtre de détail">
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <img id="modalImage" src="" alt="Image détaillée du projet" class="modal-image" />
+          <p id="modalDescription">Description détaillée du projet...</p>
+          <div id="modalParagraphs" style="margin-top: 20px;"></div>
+          <div id="modalTags" class="project-tags" style="margin-bottom: 20px"></div>
+          <div id="modalLinks" style="display: flex; gap: 10px; margin-top: 15px"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer>© <span id="year"></span> Maxime TANG — Portfolio</footer>
+  </div>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    const btn = document.getElementById("toggleTheme");
+    btn.addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+    });
+
+    // Réduction progressive du header lors du scroll
+    const header = document.getElementById("mainHeader");
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 150) {
+        header.classList.add("shrink");
+      } else {
+        header.classList.remove("shrink");
+      }
+    });
+
+    // NOUVEAU : GESTION DES MODALES DE PROJETS
+    const experiencesData = {
+      e1: {
+        title: "Alternance — MBDA",
+        image: "BA-OpenLab-109-1200x658.jpg",
+        description:
+        " J'ai effectué ma troisième année de BUT GMP à MBDA, en tant qu'apprenti référent OpenLab, le fablab interne de MBDA.",
+        paragraphs: [
+          {
+            title: "  Mission principale",
+            content: "Former les nouveaux utilisateurs aux différents moyens mis à disposition (imprimantes 3D Bambulab X1E, scanner 3D Zeiss GOM 1, logiciel de CAO Fusion 360), veiller au bon fonctionnement des différentes machines, la mise en service de nouveaux moyens et le déménagement de la zone OpenLab"
+          },
+          {
+            title: "Mission secondaire",
+            content: "Développement du réseau entre les OpenLab présents sur les différents sites du groupe MBDA. "
+          },
+        ],         
+      },
+      e2: {
+        title: "Stage — MBDA",
+        image: "so100.png",
+        description:  
+          "J'ai effectué mon stage deuxième année de BUT GMP de 3 mois chez MBDA.",
+        paragraphs: [
+          {
+            title: "Sujet de stage",
+            content: "Mise en œuvre d'un démonstrateur robotique d'intelligence artificielle"
+          },
+          {
+            title: "Description",
+            content: "Le but de ce stage était d'exploiter un démonstrateur robotique, le LeRobot SO-100, afin de tester les capacités et les limites de l'intelligence artificielle de Huggingface."
+          },
+        ],
+      },
+      e3: {
+        title: "English teaching volunteer service program - OCAC",
+        image: "KSHS.JPG",
+        description:  
+          "J'ai participé à un programme d'enseignement de l'anglais à des élèves de primaire pendant l'été 2023, organisé par l'OCAC (Overseas Communities Affairs Council). Après une semaine de formation à Taipei, j'ai été envoyé à Kaohsiung, une petite ville du sud de Taiwan, où j'ai enseigné pendant 3 semaines.",
+      },
+    };
+
+    const projectsData = {
+      p4: {
+        title: "Delorean RC",
+        image: "delorean.png",
+        description:
+          "Dans le cadre de la spécialité Innovation pour l'industrie du GMP, j'ai réalisé un projet de conception et fabrication de la carrosserie d'une voiture télécommandée Delorean à l'aide des différents moyens de fabrication disponibles à l'IUT d'Orléans.",
+        paragraphs: [
+          {
+            title: "Modélisation CAO",
+            content: "Création du modèle 3D complet de la coque de la Delorean à partir de plan 2D de la voiture, à l'aide de la fonction surfacique de CREO."
+          },
+          {
+            type: 'image',
+            src : 'delorean_cao.png',
+            alt : 'Modélisation CAO de la Delorean',
+          },
+          {
+            title: "Usinage du patron de thermoformage",
+            content: "Usinage du patron de thermoformage en mousse haute densité pour la fabrication de la coque à l'aide des fraiseuses Roland."
+          },
+          {
+            type: 'image',
+            src : 'delorean_cnc.jpg',
+            alt : 'Usinage du patron de thermoformage de la Delorean',
+          },
+          {
+            title: "Thermoformage",
+            content: "Fonte d'une plaque de plastique transparent pour épouser la forme du patron de thermoformage et former la coque de la Delorean."
+          },
+          {
+            type: 'image',
+            src : 'delorean_thermoformage.png',
+            alt : 'Thermoformage de la coque de la Delorean',
+          },
+        ],
+      },
+      p3: {
+        title: "Boîte à musique",
+        image: "musicbox_fermée.png",
+        description:
+          "Dans le cadre du projet de 2ème année de BUT GMP, j'ai eu pour projet l'organisation du Quiz GMP, un événement qui accueille tous les étudiants de l'IUT pour s'affronter lors de plusieurs épreuves. J'étais personnellement responsable de la conception et fabrication d'un mécanisme montable en moins de 3 min pour départager les équipes finalistes. Pour ce faire, j'ai conçu et fabriqué une boîte à musique à l'aide des différents moyens de fabrication disponibles à l'IUT d'Orléans.",
+        paragraphs: [
+          {
+            title: "Conception du mécanisme",
+            content: "Développement d'un modèle CAO basé sur l'analyse de l'existant, adapté pour répondre aux contraintes spécifiques du projet. Intégration d'un kalimba au cœur du mécanisme pour la partie musicale."
+          },
+          {
+            type: 'image',
+            src : 'musicbox_cao.png',
+            alt : 'Modélisation CAO de la boîte à musique',
+          },
+          {
+            title: "Impression 3D et ajustement des composants",
+            content: "Impression 3D des différentes pièces du mécanisme à l'aide des imprimantes 3D Creality K2 Plus disponibles à l'IUT. Réalisation de plusieurs itérations pour ajuster les paramètres et assurer un mécanisme fonctionnel. Préparation de la documentation technique pour l'assemblage rapide."
+          },
+          {
+            type: 'image',
+            src : 'musicbox_ouvert.png',
+            alt : "Impression 3D des pièces de la boîte à musique",
+          },
+          {
+            title: "Organisation du Quiz GMP",
+            content: "Organisation globale de l'événement, incluant la préparation des épreuves, des questions et la gestion logistique."
+          },
+        ],
+      },
+      p5: {
+        title: "Polyblimp - SpaceTech",
+        image: "polyblimp_enveloppe.png",
+        description:
+          "Avec l'association étudiante SpaceTech Orléans, j'ai participé au Float Lift and Fly constest organisé par planète science. Pour cela, nous avons conçu un dirigeable radiocommandée de 6 mètres de long capable de récupérer, stocker et décharger des grumes de bois.",
+        paragraphs: [
+          {
+            title: "Analyse fonctionnelle",
+            content: "Étude détaillée du cahier des charges et définition des solutions techniques répondant aux exigences fonctionnelles et contraintes du projet."
+          },
+          {
+            title: "Concetption 3D",
+            content: "Concption de la structure du dirigeable ainsi que du système de préhension des grumes."
+          },
+          {
+            type: 'image',
+            src : 'polyblimp_cao.png',
+            alt : "Impression 3D des pièces de la boîte à musique",
+          },
+          {
+            title: "Intégration des systèmes embarqués",
+            content: "Intégration des composants électroniques et des systèmes de contrôle pour assurer la fonctionnalité et la fiabilité du dirigeable. Codage de l'Arduino pour la gestion des moteurs et du préhenseur."
+          }
+        ],
+      },
+      p6: {
+        title: "24H de l'Innovation 2025 - Prix coup de cœur du jury",
+        image: "24H_2025.jpg",
+        description:
+          "Durant les 24H de l'Innovation 2025 organisé à Chartres, j'ai eu l'occasion de travailler sur un porjet porté par Roxel : la conception d'un col de missile à section variable.",
+        paragraphs: [
+          {
+            title: "Recherche de solutions innovantes",
+            content: "Analyse des solutions existantes et identification des opportunités d'innovation pour répondre aux besoins spécifiques du client. Finalement, nous avons opté pour un système semblable à un aérospike, une sorte de cône permettant d'obstruer partiellement le col de passage de la propulsion."
+          },
+          {
+            title: "Conception 3D du demonstrateur",
+            content: "Modélisation du col de missile à section variable en utilisant CREO, en intégrant les contraintes techniques et les exigences de performance."
+          },
+          {
+            type: 'image',
+            src : 'spike.png',
+            alt : "Impression 3D des pièces de la boîte à musique",
+          },
+          {
+            type: 'image',
+            src : 'spike_500.png',
+            alt : "Impression 3D des pièces de la boîte à musique",
+          },
+          {
+            type: 'image',
+            src : 'spike_300.png',
+            alt : "Impression 3D des pièces de la boîte à musique",
+          },
+          {
+            title: "Maquette et présentation",
+            content: "Fabrication de la maquette de démonstration et présentation du projet au jury."
+          }
+        ],
+      },
+      p7: {
+        title: "24H de l'Innovation 2024 - Prix de la meilleure conception",
+        image: "décalé.png",
+        description:
+          "Durant les 24H de l'Innovation 2024 organisées à Bourges, j'ai eu l'occasion de travailler sur un projet porté par Saint Gobain : la conception d'une cale innovante pour pare-brises d'avion.",
+        paragraphs: [
+          {
+            title: "Recherche de solutions innovantes",
+            content: "Analyse des solutions existantes et identification des opportunités d'innovation pour répondre aux besoins spécifiques du client. Nous avons opté pour un système automatisé de dépôt de cales à l'aide d'une imprimante 3D 4 axes adaptée à toute forme de pare-brise."
+          },
+          {
+            title: "Conception 3D du demonstrateur",
+            content: "Modélisation de l'impression 3D 4 axes de dépôt de cales en utilisant CREO, en intégrant les contraintes techniques et les exigences de performance."
+          },
+          {
+            type: 'image',
+            src : 'cale_cao.png',
+            alt : "Impression 3D des pièces de la cale innovante",
+          },
+          {
+            title: "Maquette et présentation",
+            content: "Fabrication de la maquette de démonstration et présentation du projet au jury."
+          },
+          {
+            type: 'image',
+            src : 'cale_maquette.png',
+            alt : "Impression 3D des pièces de la câle innovante",
+          },
+        ],
+      },
+      p8: {
+        title: "24H de l'Innovation 2023 - Prix de la précision industrielle",
+        description:
+          "Lors des 24H de l'Innovation 2023 organisées à Polytech Orléans, j'ai eu l'occasion de travailler sur un projet porté par JTEKT Bearings : l'automatisation de l'assemblage de butées à aiguilles.",
+        paragraphs: [
+          {
+            title: "Recherche de solutions innovantes",
+            content: "Recherche de solutions innovantes pour répondre aux défis techniques du projet et se démarquer par des approches originales. Nous avons opté pour un système d'assemblage automatisé utilisant un système d'aspiration pour placer et maintenir les aiguilles dans la cage de la butée."
+          },
+          {
+            title: "Conception 3D du démonstrateur",
+            content: "Conception 3D du démonstrateur en utilisant CREO, en intégrant les contraintes techniques et les exigences de performance."
+          },
+          {
+            type: 'image',
+            src : '24H_butée.png',
+            alt : "Impression 3D des pièces de l'automatisation de l'assemblage de butées à aiguilles",
+          },
+          {
+            title: "Maquette et présentation",
+            content: "Fabrication de la maquette de démonstration et présentation du projet au jury."
+          }
+        ],
+      },
+    };
+
+    const modal = document.getElementById("projectModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalImage = document.getElementById("modalImage");
+    const modalDescription = document.getElementById("modalDescription");
+    const modalParagraphs = document.getElementById("modalParagraphs");
+    const modalTags = document.getElementById("modalTags");
+    const modalLinks = document.getElementById("modalLinks");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const projectCards = document.querySelectorAll(
+      ".project-card.open-modal"
+    );
+
+    // Fonction pour ouvrir la modale
+    function openModal(projectId) {
+      // Cherche d'abord dans projectsData puis dans experiencesData
+      let data = projectsData[projectId];
+      if (!data && typeof experiencesData !== "undefined") {
+        data = experiencesData[projectId];
+      }
+      if (!data) return;
+
+      // Remplir la modale avec les données
+      modalTitle.textContent = data.title;
+      modalImage.src = data.image;
+      modalDescription.textContent = data.description;
+
+      // Paragraphs (if available)
+      if (data.paragraphs && data.paragraphs.length > 0) {
+        modalParagraphs.innerHTML = data.paragraphs
+          .map(
+            (para) => {
+              if (para.type === 'image') {
+                return `<img src="${para.src}" alt="${para.alt || ''}" style="width: 100%; height: auto; border-radius: 8px; margin-bottom: 16px;" />`;
+              } else {
+                return `<div style="margin-bottom: 16px;">
+                  <h3 style="margin: 0 0 8px 0; color: var(--accent);">${para.title}</h3>
+                  <p style="margin: 0; line-height: 1.6;">${para.content}</p>
+                </div>`;
+              }
+            }
+          )
+          .join("");
+        modalParagraphs.style.display = "block";
+      } else {
+        modalParagraphs.innerHTML = "";
+        modalParagraphs.style.display = "none";
+      }
+
+      // Tags
+      modalTags.innerHTML = (data.tags || [])
+        .map((tag) => `<span class="tag">${tag}</span>`)
+        .join("");
+
+      // Liens
+      modalLinks.innerHTML = (data.links || [])
+        .map(
+          (link) =>
+            `<a href="${link.href}" target="_blank" class="${link.class}">${link.text}</a>`
+        )
+        .join("");
+
+      // Afficher la modale
+      modal.classList.add("active");
+      document.body.style.overflow = "hidden"; // Empêche le scroll du body
+      
+      // Scroll modal content to top
+      const modalContent = modal.querySelector(".modal-content");
+      if (modalContent) {
+        modalContent.scrollTop = 0;
+      }
+    }
+
+    // Fonction pour fermer la modale
+    function closeModal() {
+      modal.classList.remove("active");
+      document.body.style.overflow = ""; // Rétablit le scroll du body
+    }
+
+    // Événement au clic sur les cartes de projet
+    projectCards.forEach((card) => {
+      card.addEventListener("click", () => {
+        const projectId = card.dataset.projectId;
+        openModal(projectId);
+      });
+    });
+
+    // Événements de fermeture
+    closeModalBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        closeModal(); // Fermer si on clique sur l'overlay
+      }
+    });
+
+    // Fermeture avec la touche Échap
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("active")) {
+        closeModal();
+      }
+    });
+
+    // ---------------- LOGIQUE CARROUSEL ET GRILLE ----------------
+    const projectSection = document.getElementById("projets");
+    const grid = document.getElementById("projectsGrid");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const toggleBtn = document.getElementById("toggleProjectsView");
+    const scrollNav = document.querySelector("#projets .scroll-nav");
+
+    // --- Logique de défilement ---
+    function scrollProjects(direction) {
+      const firstCard = grid.querySelector(".project-card");
+      if (!firstCard) return;
+
+      const cardStyle = window.getComputedStyle(firstCard);
+      const cardWidth = parseFloat(cardStyle.width);
+      const cardGap = parseFloat(window.getComputedStyle(grid).gap);
+      const scrollStep = cardWidth + cardGap;
+
+      grid.scrollBy({
+        left: direction * scrollStep,
+        behavior: "smooth",
+      });
+    }
+
+    // --- Mettre à jour l'état des flèches ---
+    function updateArrowState() {
+      if (!grid || !prevBtn || !nextBtn) return;
+
+      if (projectSection.classList.contains("projects-grid-view")) {
+        scrollNav.style.display = "none";
+        return;
+      }
+
+      scrollNav.style.display = "flex";
+
+      prevBtn.disabled = grid.scrollLeft < 10;
+
+      const maxScroll = grid.scrollWidth - grid.clientWidth;
+      nextBtn.disabled = grid.scrollLeft >= maxScroll - 10;
+    }
+
+    // --- Logique du bouton "Tout afficher" / "Carrousel" ---
+    toggleBtn.addEventListener("click", () => {
+      projectSection.classList.toggle("projects-grid-view");
+      const isGridView =
+        projectSection.classList.contains("projects-grid-view");
+
+      if (isGridView) {
+        toggleBtn.textContent = "Carrousel";
+      } else {
+        toggleBtn.textContent = "Tout afficher";
+      }
+      updateArrowState();
+    });
+
+    // --- Écouteurs d'événements ---
+    prevBtn.addEventListener("click", () => scrollProjects(-1));
+    nextBtn.addEventListener("click", () => scrollProjects(1));
+    grid.addEventListener("scroll", updateArrowState);
+    window.addEventListener("resize", updateArrowState);
+
+    // --- Initialisation ---
+    updateArrowState();
+
+    // ---------------- LOGIQUE CARROUSEL POUR EXPERIENCES ----------------
+    const experiencesSection = document.getElementById("experiences");
+    const expGrid = document.getElementById("experiencesGrid");
+    const prevExpBtn = document.getElementById("prevExpBtn");
+    const nextExpBtn = document.getElementById("nextExpBtn");
+    const toggleExpBtn = document.getElementById("toggleExperiencesView");
+    const expScrollNav = document.querySelector("#experiences .scroll-nav");
+
+    function scrollExperiences(direction) {
+      const firstCard = expGrid.querySelector(".project-card");
+      if (!firstCard) return;
+
+      const cardStyle = window.getComputedStyle(firstCard);
+      const cardWidth = parseFloat(cardStyle.width);
+      const cardGap = parseFloat(window.getComputedStyle(expGrid).gap);
+      const scrollStep = cardWidth + cardGap;
+
+      expGrid.scrollBy({
+        left: direction * scrollStep,
+        behavior: "smooth",
+      });
+    }
+
+    function updateExpArrowState() {
+      if (!expGrid || !prevExpBtn || !nextExpBtn) return;
+
+      if (experiencesSection.classList.contains("projects-grid-view")) {
+        expScrollNav.style.display = "none";
+        return;
+      }
+
+      expScrollNav.style.display = "flex";
+
+      prevExpBtn.disabled = expGrid.scrollLeft < 10;
+
+      const maxScroll = expGrid.scrollWidth - expGrid.clientWidth;
+      nextExpBtn.disabled = expGrid.scrollLeft >= maxScroll - 10;
+    }
+
+    toggleExpBtn.addEventListener("click", () => {
+      experiencesSection.classList.toggle("projects-grid-view");
+      const isGridView =
+        experiencesSection.classList.contains("projects-grid-view");
+
+      if (isGridView) {
+        toggleExpBtn.textContent = "Carrousel";
+      } else {
+        toggleExpBtn.textContent = "Tout afficher";
+      }
+      updateExpArrowState();
+    });
+
+    prevExpBtn.addEventListener("click", () => scrollExperiences(-1));
+    nextExpBtn.addEventListener("click", () => scrollExperiences(1));
+    expGrid.addEventListener("scroll", updateExpArrowState);
+    window.addEventListener("resize", () => {
+      updateArrowState();
+      updateExpArrowState();
+    });
+
+    // --- Initialisation ---
+    updateArrowState();
+    updateExpArrowState();
+    // ---------------- FIN DE LA LOGIQUE CARROUSEL ----------------
+  </script>
+</body>
+
+</html>
